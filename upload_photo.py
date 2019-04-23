@@ -9,7 +9,6 @@ def upload_photo(login, password, directory):
     bot.login(username=login, password = password)
     for root, dirs, filenames in os.walk(directory):
         for f in filenames:
-            print('file', f)
             bot.upload_photo(os.path.join(root, f)) 
 
       

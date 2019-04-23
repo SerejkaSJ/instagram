@@ -1,13 +1,7 @@
 import requests
 import json
-
+from load_image import load_image
 directory = 'images/'
-
-
-def load_image(url, path):
-  response = requests.get(url)
-  with open(path, 'wb') as file:
-    file.write(response.content)
 
 
 def fetch_spacex_last_launch(folder, flight_number = "latest"):
@@ -15,9 +9,12 @@ def fetch_spacex_last_launch(folder, flight_number = "latest"):
         flight_number = "latest"
     url = "https://api.spacexdata.com/v3/launches/{}"
     response = requests.get(url.format(flight_number))
-    result = response.json()
-    for number, link in enumerate(result['links']['flickr_images']):
-        load_image(link, folder + 'space{}.jpg'.format(number))
+    if response.ok:
+        result = response.json()
+        for number, link in enumerate(result['links']['flickr_images']):
+            load_image(link, folder + 'space{}.jpg'.format(number))
+    else:
+        print("Error loading pictures")
       
       
 if __name__ == "__main__":

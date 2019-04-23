@@ -1,32 +1,32 @@
 import requests
 import json
 import argparse
+import urllib
+from load_image import load_image
 
 directory = 'images/'
 
 
-def load_image(url, path):
-  response = requests.get(url)
-  with open(path, 'wb') as file:
-    file.write(response.content)
-
-
-def get_extension(path_or_file):
-    if '\\' in path_or_file:
-        extension = path_or_file.split('\\')[-1].split('.')[1]
-    elif '/' in path_or_file:
-        extension = path_or_file.split('/')[-1].split('.')[1]
+def get_extension(path):
+    if '\\' in path:
+        extension = path.split('\\')[-1].split('.')[1]
+    elif '/' in path:
+        extension = path.split('/')[-1].split('.')[1]
     else:
-        extension = path_or_file.split('.')[1]
+        extension = path.split('.')[1]
     return extension
 
 def load_image_from_hubble_id(id_image, directory):
     url = 'http://hubblesite.org/api/v3/image/{}'
     response = requests.get(url.format(id_image))
-    result = response.json()
-    link = result['image_files'][-1]['file_url']
-    extension = get_extension(link)
-    load_image(link, '{}{}.{}'.format(directory, id_image, extension))
+    if response.ok:
+        result = response.json()
+        link = result['image_files'][-1]['file_url']
+        path = urllib.parse.urlparse(link).path
+        extension = get_extension(path)
+        load_image(link, '{}{}.{}'.format(directory, id_image, extension))
+    else:
+        print("Error loading pictures")
       
 
 def load_image_from_hubble_collection(collection_name, directory):
@@ -36,10 +36,12 @@ def load_image_from_hubble_collection(collection_name, directory):
         'collection_name' : collection_name
     }
     response = requests.get(url, json = payload)
-    collections = response.json()
-    for number, collection in enumerate(collections):
-        print(number, collection)
-        load_image_from_hubble_id(collection['id'], directory)
+    if response.ok:
+        collections = response.json()
+        for number, collection in enumerate(collections):
+            load_image_from_hubble_id(collection['id'], directory)
+    else:
+        print("Error retrieving collection information")
 
 
 if __name__ == "__main__":
