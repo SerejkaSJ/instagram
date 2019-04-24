@@ -9,13 +9,14 @@ def fetch_spacex_last_launch(folder, flight_number = "latest"):
         flight_number = "latest"
     url = "https://api.spacexdata.com/v3/launches/{}"
     response = requests.get(url.format(flight_number))
-    if response.ok:
-        result = response.json()
-        for number, link in enumerate(result['links']['flickr_images']):
-            load_image(link, folder + 'space{}.jpg'.format(number))
-    else:
-        print("Error loading pictures")
+    response.raise_for_status()
+    result = response.json()
+    for number, link in enumerate(result['links']['flickr_images']):
+        load_image(link, folder + 'space{}.jpg'.format(number))
       
       
 if __name__ == "__main__":
-    fetch_spacex_last_launch(directory)
+    try:
+        fetch_spacex_last_launch(directory)
+    except  requests.exceptions.HTTPError as err:
+        print("Error request http:", err)     
