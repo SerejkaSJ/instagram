@@ -1,4 +1,4 @@
 requests==2.21.0
 python-dotenv==0.9.1
 instabot==0.31.0
-urllib3==1.24.1
+urllib3==1.24.2
